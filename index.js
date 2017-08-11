@@ -1,100 +1,91 @@
 class SQF {
-	constructor() {
-		this.selectExpressions = []; // Select
-		this.dataSource = undefined; // From
-		this.conditions = []; // Where
-	}
+    constructor() {
+        this._select = [];
+        this._from = undefined;
+        this._where = [];
 
-	select(...expressions) { // Or just use arguments instead of the spread operator
-		for (const expression of expressions) {
-			this.selectExpressions.push(expression);
-		}
-		return this;
-	}
+    }
 
-	from(source) {
-		this.dataSource = source;
-		return this;
-	}
+    select( ...statements ) {
+        const isValid = statements.every((statement) => {
+            if ( typeof statement === "string" ) { return true; }
 
-	where(...conditions) {
-		for (const condition of conditions) {
-			this.conditions.push(condition);
-		}
-		return this;
-	}
+            if ( Array.isArray( statement ) && statement.length === 2 ) {
+                if ( statement.every( ( e ) => typeof e === "string" ) ) { return true; }
+                if ( typeof statement[0] === "function" && typeof statement[1] === "string" ) { return true; }
+            }
 
-	run() {		
-		return this.dataSource.filter((row) => { // Where processing
-			return this.conditions.every((condition) => {
-				return condition(row);;
-			});
-		}).map((row) => { // Select processing
-			const projection = {};
-			for (const expression of this.selectExpressions) {
-				projection[expression] = row[expression];
-			}
-			return projection;
-		});
-	}
+            return false;
+        });
+
+        if ( isValid ) { this._select = statements; }
+        else { throw "Error: Invalid select statement."; }
+
+        return this;
+    }
+
+    from( dataSource ) {
+        const data = Array.from( dataSource );
+
+        const isValid = data.every( ( obj ) => typeof obj === "object" );
+
+        if ( isValid ) { this._from = data; }
+        else { throw "Error: Invalid data source."; }
+        
+        return this;
+    }
+
+    where( ...clauses ) {
+        const isValid = clauses.every( (condition) => typeof condition === "function" );
+        
+        if ( isValid ) { this._where = clauses; }
+        else { throw "Error: Invalid where clause."; }
+
+        return this;
+    }
+
+    run() {
+        let result = [];
+
+        result = this._from.filter((row) => {
+            return this._where.every((clause) => {
+                return clause(row);
+            });
+        });
+
+        result = result.map((row) => {
+            const projection = {};
+            for ( const statement of this._select ) {
+                if ( typeof statement === "string" ) {
+                    if ( row.hasOwnProperty(statement) ) { 
+                        projection[statement] = row[statement];
+                    } else {
+                        throw "Error: Property not found.";
+                    }
+                }
+
+                if ( Array.isArray( statement ) && statement.length === 2 ) {
+                    if ( statement.every( ( e ) => typeof e === "string" && row.hasOwnProperty(statement[0]) ) ) {
+                        projection[statement[1]] = row[statement[0]];
+                    }
+                    if ( typeof statement[0] === "function" && typeof statement[1] === "string" ) { // Functions can still be used to acess inherited properties
+                        projection[statement[1]] = statement[0](row);
+                    }
+                }
+            }
+
+            return projection;
+        });
+
+        return result;
+    }
 }
 
-const employees = [
-	{
-		firstname: "Antonio",
-		lastname: "Hernández",
-		email: "antonio@sqf.js",
-		hireDate: new Date(),
-		age: 24,
-		jobTitle: "Software Developer",
-		salary: 10000,
-		department: "IT"
-	},
-	{
-		firstname: "Juan",
-		lastname: "Perez",
-		email: "juan@sqf.js",
-		hireDate: new Date(),
-		age: 23,
-		jobTitle: "Software Developer",
-		salary: 12000,
-		department: "IT"
-	},
-	{
-		firstname: "Brian",
-		lastname: "K.",
-		email: "brian@sqf.js",
-		hireDate: new Date(),
-		age: 27,
-		jobTitle: "Sales Manager",
-		salary: 10000,
-		department: "Sales"
-	}
-];
 
-const q = new SQF(); // Query
 
-q.select( 
-	"firstname", 
-	"lastname",
-	"department" 
-);
 
-q.from(employees);
 
-q.where(
-	(row) => row.salary > 10000, 
-	(row) => row.department === "IT" 
-);
 
-const result = q.run();
-console.log(result);
 
-/*
-q.select( 
-	"column1", 
-	"column2", 
-	["column3", "AliasC"], 
-	[(row) => `${row.column1 + row.column2}`, "AliasB"] 
-);
-*/
+
+
