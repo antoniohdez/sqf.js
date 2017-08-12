@@ -8,7 +8,7 @@ const employees = [
         age: 24,
         jobTitle: "Software Developer",
         salary: 10000,
-        department: "IT"
+        departmentId: 1
     },
     {
         id: 2,
@@ -19,7 +19,7 @@ const employees = [
         age: 23,
         jobTitle: "Software Developer",
         salary: 12000,
-        department: "IT"
+        departmentId: 1
     },
     {
         id: 3,
@@ -30,28 +30,69 @@ const employees = [
         age: 27,
         jobTitle: "Sales Manager",
         salary: 10000,
-        department: "Sales"
+        departmentId: 2
+    },
+    {
+        id: 4,
+        firstname: "Kevin",
+        lastname: "B.",
+        email: "kevin@sqf.js",
+        hireDate: new Date(),
+        age: 24,
+        jobTitle: "Software Developer",
+        salary: 15000,
+        departmentId: 1
+    },
+    {
+        id: 5,
+        firstname: "JL",
+        lastname: "Q.",
+        email: "jl@sqf.js",
+        hireDate: new Date(),
+        age: 24,
+        jobTitle: "Manager",
+        salary: 20000,
+        departmentId: 1
     }
 ];
 
-const q = new SQF(); // Query
+const departments = [
+    {
+        id: 1,
+        department: "IT",
+        projects: 4
+    },
+    {
+        id: 2,
+        department: "Sales",
+        projects: 2
+    }
+];
 
-q.select( 
-    "id",
+const query = new SQF(); // Query
+
+query.select( 
+    "emp.id",
     [
-        (row) => `${row.firstname} ${row.lastname}`, 
+        (row) => `${ row[ 'emp.firstname' ] } ${ row[ 'emp.lastname' ] }`,
         "fullname"
     ], 
-    ["email", "email_address"],
-    "department"
+    ["emp.email", "email_address"],
+    "dept.department"
 );
 
-q.from(employees);
-
-q.where(
-    (row) => row.salary > 10000, 
-    (row) => row.department === "IT" 
+query.from( 
+    SQF.JOIN( 
+        [employees, "emp"], 
+        [departments, "dept"], 
+        (emp, dept) => emp.departmentId === dept.id  
+    ) 
 );
 
-const result = q.run();
+query.where(
+    (row) => row[ "emp.salary" ] > 10000, 
+    (row) => row[ "dept.department" ] === "IT" 
+);
+
+const result = query.run();
 console.table(result);
