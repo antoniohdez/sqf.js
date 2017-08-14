@@ -52,7 +52,7 @@ const employees = [
         age: 24,
         jobTitle: "Manager",
         salary: 20000,
-        departmentId: 3
+        departmentId: 5
     }
 ];
 
@@ -92,7 +92,7 @@ query.select(
 );
 
 query.from( 
-    SQF.RIGHT_JOIN( 
+    SQF.FULL_OUTER_JOIN( 
         [employees, "emp"], 
         [departments, "dept"], 
         (emp, dept) => emp.departmentId === dept.id  

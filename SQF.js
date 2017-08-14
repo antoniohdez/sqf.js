@@ -129,12 +129,12 @@ class SQF {
             }
 
             return joinedRow;
-        }
+        };
 
         const result = [];
 
         // Inner and left join.
-        if ( type === "inner_join" || type === "left_join" || "full_outer_join" ) {
+        if ( type === "inner_join" || type === "left_join" || type === "full_outer_join" ) {
             t1[ 0 ].forEach(
                 ( rowT1 ) => {
                     let leftMatchFound = false; // Used for left join
@@ -179,7 +179,6 @@ class SQF {
 
                                     result.push( joinedRow );    
                                 }
-                                
                             }
                         }
                     );
