@@ -52,7 +52,7 @@ const employees = [
         age: 24,
         jobTitle: "Manager",
         salary: 20000,
-        departmentId: 1
+        departmentId: 3
     }
 ];
 
@@ -64,6 +64,16 @@ const departments = [
     },
     {
         id: 2,
+        department: "Sales",
+        projects: 2
+    },
+    {
+        id: 3,
+        department: "HR",
+        projects: 5
+    },
+    {
+        id: 4,
         department: "Sales",
         projects: 2
     }
@@ -82,7 +92,7 @@ query.select(
 );
 
 query.from( 
-    SQF.JOIN( 
+    SQF.RIGHT_JOIN( 
         [employees, "emp"], 
         [departments, "dept"], 
         (emp, dept) => emp.departmentId === dept.id  
@@ -90,8 +100,8 @@ query.from(
 );
 
 query.where(
-    (row) => row[ "emp.salary" ] > 10000, 
-    (row) => row[ "dept.department" ] === "IT" 
+    /*(row) => row[ "emp.salary" ] > 10000, 
+    (row) => row[ "dept.department" ] === "IT" */
 );
 
 const result = query.run();
