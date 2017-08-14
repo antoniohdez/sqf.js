@@ -118,10 +118,23 @@ class SQF {
     }
 
     static JOIN( t1, t2, joinFunc, type = "inner_join" ) {
+        const _joinRows = ( rowT1, rowT2, aliasT1, aliasT2 ) => {
+            const joinedRow = {};
+
+            for ( const key in rowT1 ) {
+                joinedRow[ `${ aliasT1 }.${ key }` ] = rowT1[ key ];
+            }
+            for ( const key in rowT2 ) {
+                joinedRow[ `${ aliasT2 }.${ key }` ] = rowT2[ key ];
+            }
+
+            return joinedRow;
+        }
+
         const result = [];
 
         // Inner and left join.
-        if ( type === "inner_join" || type === "left_join" ) {
+        if ( type === "inner_join" || type === "left_join" || "full_outer_join" ) {
             t1[ 0 ].forEach(
                 ( rowT1 ) => {
                     let leftMatchFound = false; // Used for left join
@@ -132,14 +145,8 @@ class SQF {
                             if ( joinFunc( rowT1, rowT2 ) ) {
                                 leftMatchFound = true;
 
-                                const joinedRow = {};
-
-                                for ( const key in rowT1 ) {
-                                    joinedRow[ `${ t1[ 1 ] }.${ key }` ] = rowT1[ key ];
-                                }
-                                for ( const key in rowT2 ) {
-                                    joinedRow[ `${ t2[ 1 ] }.${ key }` ] = rowT2[ key ];
-                                }
+                                const joinedRow = _joinRows( rowT1, rowT2, t1[ 1 ], t2[ 1 ] );
+                                
                                 result.push( joinedRow );
                             }
                         }
@@ -147,11 +154,9 @@ class SQF {
 
                     // Left join ( when objects doesn't match )
                     // If object for left site is not found, add left object to results
-                    if ( type === "left_join" && ! leftMatchFound ) {
-                        const joinedRow = {};
-                        for ( const key in rowT1 ) {
-                            joinedRow[ `${ t1[ 1 ] }.${ key }` ] = rowT1[ key ];
-                        }
+                    if ( ( type === "left_join" || type === "full_outer_join" ) && ! leftMatchFound ) {
+                        const joinedRow = _joinRows( rowT1, {}, t1[ 1 ], undefined );
+
                         result.push( joinedRow );
                     }
                 }
@@ -159,7 +164,7 @@ class SQF {
         }
 
         // Right join
-        if ( type === "right_join" ) {
+        if ( type === "right_join" || type === "full_outer_join" ) {
             t2[ 0 ].forEach(
                 ( rowT2 ) => {
                     let rightMatchFound = false;
@@ -169,26 +174,21 @@ class SQF {
                             if ( joinFunc( rowT1, rowT2 ) ) {
                                 rightMatchFound = true;
 
-                                const joinedRow = {};
+                                if ( type === "right_join" ) {
+                                    const joinedRow = _joinRows( rowT1, rowT2, t1[ 1 ], t2[ 1 ] );
 
-                                for ( const key in rowT1 ) {
-                                    joinedRow[ `${ t1[ 1 ] }.${ key }` ] = rowT1[ key ];
+                                    result.push( joinedRow );    
                                 }
-                                for ( const key in rowT2 ) {
-                                    joinedRow[ `${ t2[ 1 ] }.${ key }` ] = rowT2[ key ];
-                                }
-                                result.push( joinedRow );
+                                
                             }
                         }
                     );
 
                     // Right join ( when objects doesn't match )
                     // If object for right site is not found, add right object to results
-                    if ( type === "right_join" && ! rightMatchFound ) {
-                        const joinedRow = {};
-                        for ( const key in rowT2 ) {
-                            joinedRow[ `${ t2[ 1 ] }.${ key }` ] = rowT2[ key ];
-                        }
+                    if ( ( type === "right_join" || type === "full_outer_join" ) && ! rightMatchFound ) {
+                        const joinedRow = _joinRows( rowT2, {}, t2[ 1 ], undefined );
+                        
                         result.push( joinedRow );
                     }
                 }
