@@ -1,8 +1,13 @@
 class SQF {
     constructor() {
         this._select = [];
-        this._from = undefined;
+        this._from = [];
         this._where = [];
+
+        /* Cursor */
+        this._mode = "query";
+        this._cursorState = {};
+
     }
 
     select( ...statements ) {
@@ -133,7 +138,7 @@ class SQF {
 
         const result = [];
 
-        // Inner and left join.
+        // Inner, left, full outer join.
         if ( type === "inner_join" || type === "left_join" || type === "full_outer_join" ) {
             t1[ 0 ].forEach(
                 ( rowT1 ) => {
@@ -163,7 +168,7 @@ class SQF {
             );    
         }
 
-        // Right join
+        // Right and full outer join 
         if ( type === "right_join" || type === "full_outer_join" ) {
             t2[ 0 ].forEach(
                 ( rowT2 ) => {
