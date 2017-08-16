@@ -82,7 +82,7 @@ const departments = [
 const query = new SQF(); // Query
 
 query.select( 
-    "emp.id",
+    "*",
     [
         (row) => `${ row[ 'emp.firstname' ] } ${ row[ 'emp.lastname' ] }`,
         "fullname"

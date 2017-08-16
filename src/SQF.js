@@ -4,35 +4,58 @@ class SQF {
         this._from = [];
         this._where = [];
 
-        /* Cursor */
-        this._mode = "query";
-        this._cursorState = {};
-
     }
 
     select( ...statements ) {
-        const isValid = statements.every(
+        function getStatement( value, type, alias ) {
+            return { value, type, alias };
+        }
+        const arrayLength = 2; // Valid legth for array select statements
+        const statementIndex = 0; // Statement [string|function] index
+        const aliasIndex = 1; // Alias index
+
+        
+        let isValid = false;
+
+        isValid = statements.every(
             (statement) => {
-                if ( typeof statement === "string" ) { 
-                    return true; 
+                let selectStatement = {};
+
+                if ( typeof statement === "string" ) {
+
+                    if ( statement === "*" ) {
+                        selectStatement = getStatement( statement, "star" );
+                    } else {
+                        selectStatement = getStatement( statement, "column" );
+                    }
+
+                    this._select.push( selectStatement );
+                    return true;
                 }
 
-                if ( Array.isArray( statement ) && statement.length === 2 ) {
+                if ( Array.isArray( statement ) && statement.length === arrayLength ) {
+
                     if ( statement.every( ( e ) => typeof e === "string" ) ) { 
-                        return true; 
+                        selectStatement = getStatement( statement[ statementIndex ], "alias", statement[ aliasIndex ] );
+
+                    } else if ( typeof statement[ statementIndex ] === "function" && typeof statement[ aliasIndex ] === "string" ) {
+                        selectStatement = getStatement( statement[statementIndex], "function", statement[aliasIndex] );
+
+                    } else {
+                        return false;
                     }
-                    if ( typeof statement[0] === "function" && typeof statement[1] === "string" ) { 
-                        return true; 
-                    }
+
+                    this._select.push( selectStatement );
+                    return true;
                 }
 
                 return false;
             }
         );
 
-        if ( isValid ) { 
-            this._select = statements; 
-        } else { 
+        console.log( this._select );
+
+        if ( !isValid ) { 
             throw "Error: Invalid select statement."; 
         }
 
@@ -83,23 +106,26 @@ class SQF {
         // Select
         result = result.map(
             ( row ) => {
-                const projection = {};
+                let projection = {};
                 for ( const statement of this._select ) {
+                    
+                    switch ( statement.type ) {
+                        case "star":
+                            projection = row;
+                            break;
 
-                    if ( typeof statement === "string" ) {
-                        if ( row.hasOwnProperty( statement ) ) { 
-                            projection[ statement ] = row[ statement ];
-                        }
-                    }
+                        case "column":
 
-                    if ( Array.isArray( statement ) && statement.length === 2 ) {
-                        if ( statement.every( ( e ) => typeof e === "string" && row.hasOwnProperty( statement[ 0 ] ) ) ) {
-                            projection[ statement[ 1 ] ] = row[ statement[ 0 ] ];
-                        }
+                            projection[ statement.value ] = row[ statement.value ];
+                            break;
 
-                        if ( typeof statement[ 0 ] === "function" && typeof statement[ 1 ] === "string" ) { // Inherited properties can still be used via functions
-                            projection[ statement[ 1 ] ] = statement[ 0 ]( row );
-                        }
+                        case "alias":
+                            projection[ statement.alias ] = row[ statement.value ];
+                            break;
+
+                        case "function":
+                            projection[ statement.alias ] = statement.value( row );
+                            break;
                     }
                 }
 
