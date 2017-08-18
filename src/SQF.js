@@ -59,19 +59,25 @@ class SQF {
             throw "Error: Invalid select statement."; 
         }
 
+        console.log( this );
         return this;
     }
 
-    from( dataSource ) {
-        const data = Array.from( dataSource );
+    from( source ) {
+        const data = Array.from( source );
 
         const isValid = data.every( 
             ( obj ) => typeof obj === "object" 
         );
 
-        if ( isValid ) { this._from = data; }
-        else { throw "Error: Invalid data source."; }
+        if ( isValid ) { 
+            this._from = data;
+        }
+        else { 
+            throw "Error: Invalid data source.";
+        }
         
+        console.log( this );
         return this;
     }
 
@@ -86,54 +92,74 @@ class SQF {
             throw "Error: Invalid where clause."; 
         }
 
+        console.log( this );
         return this;
     }
 
+    _projection( row ) {
+        let projection = {};
+
+        for ( const statement of this._select ) {
+            
+            switch ( statement.type ) {
+                case "star":
+                    projection = row;
+                    break;
+
+                case "column":
+                    projection[ statement.value ] = row[ statement.value ];
+                    break;
+
+                case "alias":
+                    projection[ statement.alias ] = row[ statement.value ];
+                    break;
+
+                case "function":
+                    projection[ statement.alias ] = statement.value( row );
+                    break;
+            }
+        }
+
+        return projection;
+    }
+
     run() {
+        console.log( this );
         let result = [];
 
         // Where
         result = this._from.filter( 
             ( row ) => {
                 return this._where.every(
-                    (clause) => {
-                        return clause(row);
+                    ( clause ) => {
+                        return clause( row );
                     }
                 );
             }
         );
 
         // Select
-        result = result.map(
-            ( row ) => {
-                let projection = {};
-                for ( const statement of this._select ) {
-                    
-                    switch ( statement.type ) {
-                        case "star":
-                            projection = row;
-                            break;
-
-                        case "column":
-
-                            projection[ statement.value ] = row[ statement.value ];
-                            break;
-
-                        case "alias":
-                            projection[ statement.alias ] = row[ statement.value ];
-                            break;
-
-                        case "function":
-                            projection[ statement.alias ] = statement.value( row );
-                            break;
-                    }
-                }
-
-                return projection;
-            }
-        );
+        result = result.map( (row) => this._projection( row ) );
 
         return result;
+    }
+
+    *cursor() {
+        const rows = this._from;
+
+        for ( let i = 0; i < rows.length; i++ ) {
+            const row = rows[ i ];
+
+            const validRow = this._where.every(
+                ( clause ) => {
+                    return clause( row );
+                }
+            );
+            if ( validRow ) {
+                yield this._projection( row );
+            }
+
+        }
     }
 
     static LEFT_JOIN( t1, t2, joinFunc ) {

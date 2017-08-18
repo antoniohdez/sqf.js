@@ -106,3 +106,7 @@ query.where(
 
 const result = query.run();
 console.table(result);
+
+for ( row of query.cursor() ) {
+    console.log(row);
+}
