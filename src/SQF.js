@@ -24,6 +24,9 @@ class SQF {
                 if ( typeof statement === "string" ) {
 
                     if ( statement === "*" ) {
+                        if ( this._select.some( function(statement) { return statement.value === "*" } ) ) {
+                            return false;
+                        }
                         selectStatement = getStatement( statement, "star" );
                     } else {
                         selectStatement = getStatement( statement, "column" );
@@ -35,7 +38,7 @@ class SQF {
 
                 if ( Array.isArray( statement ) && statement.length === arrayLength ) {
 
-                    if ( statement.every( ( e ) => typeof e === "string" ) ) { 
+                    if ( statement.every( ( e ) => typeof e === "string" ) && statement[ statementIndex ] !== "*" ) { 
                         selectStatement = getStatement( statement[ statementIndex ], "alias", statement[ aliasIndex ] );
 
                     } else if ( typeof statement[ statementIndex ] === "function" && typeof statement[ aliasIndex ] === "string" ) {
@@ -53,10 +56,8 @@ class SQF {
             }
         );
 
-        console.log( this._select );
-
         if ( !isValid ) { 
-            throw "Error: Invalid select statement."; 
+            throw "Error: Invalid select statement.";
         }
 
         return this;
