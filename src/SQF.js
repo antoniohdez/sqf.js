@@ -18,7 +18,7 @@ class SQF {
         let isValid = false;
 
         isValid = statements.every(
-            (statement) => {
+            ( statement ) => {
                 let selectStatement = {};
 
                 if ( typeof statement === "string" ) {
@@ -39,7 +39,7 @@ class SQF {
                         selectStatement = getStatement( statement[ statementIndex ], "alias", statement[ aliasIndex ] );
 
                     } else if ( typeof statement[ statementIndex ] === "function" && typeof statement[ aliasIndex ] === "string" ) {
-                        selectStatement = getStatement( statement[statementIndex], "function", statement[aliasIndex] );
+                        selectStatement = getStatement( statement[ statementIndex ], "function", statement[ aliasIndex ] );
 
                     } else {
                         return false;
@@ -59,7 +59,6 @@ class SQF {
             throw "Error: Invalid select statement."; 
         }
 
-        console.log( this );
         return this;
     }
 
@@ -77,13 +76,12 @@ class SQF {
             throw "Error: Invalid data source.";
         }
         
-        console.log( this );
         return this;
     }
 
     where( ...clauses ) {
         const isValid = clauses.every( 
-            (condition) => typeof condition === "function" 
+            ( condition ) => typeof condition === "function" 
         );
         
         if ( isValid ) { 
@@ -92,7 +90,6 @@ class SQF {
             throw "Error: Invalid where clause."; 
         }
 
-        console.log( this );
         return this;
     }
 
@@ -124,7 +121,6 @@ class SQF {
     }
 
     run() {
-        console.log( this );
         let result = [];
 
         // Where
@@ -139,7 +135,9 @@ class SQF {
         );
 
         // Select
-        result = result.map( (row) => this._projection( row ) );
+        result = result.map( 
+            ( row ) => this._projection( row ) 
+        );
 
         return result;
     }
@@ -255,11 +253,8 @@ class SQF {
     }
 }
 
-
-
-
-
-
-
-
-
+if ( typeof module !== 'undefined' && typeof module.exports !== 'undefined' ) {
+    module.exports = SQF;
+} else {
+    window.SQF = SQF;
+};
