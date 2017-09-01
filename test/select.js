@@ -1,15 +1,8 @@
-var assert = require( "chai" ).assert;
-var SQF = require( "../src/SQF" );
-
-function throwNextTick(error) {
-    process.nextTick(function () {
-        throw error
-    })
-}
-
+const assert = require( "chai" ).assert;
+const SQF = require( "../src/SQF" );
 
 describe( "Select - Column type statements ", function() {
-    var q = new SQF();
+    const q = new SQF();
     q.select( "name", "email" );
     
     it( "Should add 'name' as column value", function() {
@@ -28,7 +21,7 @@ describe( "Select - Column type statements ", function() {
 
 
 describe( "Select - Star type statements", function() {
-    var q = new SQF();
+    const q = new SQF();
     q.select( "*" ); 
 
     it( "Should add '*' as column value", function() {
@@ -46,9 +39,9 @@ describe( "Select - Star type statements", function() {
 
 
 describe( "Select - Alias type statements", function() {
-    var q = new SQF();
+    const q = new SQF();
     q.select( [ "name", "firstname" ] );
-    var statement = q._select[ 0 ];
+    const statement = q._select[ 0 ];
 
     it( "Should add 'name' as column value", function() {
         assert.equal( statement.value, "name" );
@@ -65,9 +58,9 @@ describe( "Select - Alias type statements", function() {
 
 
 describe( "Select - Function type statements", function() {
-    var q = new SQF();
+    const q = new SQF();
     q.select( [ (row) => row.name, "firstname" ] );
-    statement = q._select[ 0 ];
+    const statement = q._select[ 0 ];
 
     it( "Should add a function as column value", function() {
         assert.typeOf( statement.value, "function" );
@@ -84,7 +77,7 @@ describe( "Select - Function type statements", function() {
 
 
 describe( "Select - General tests", function() {
-    var q = new SQF();
+    const q = new SQF();
     q.select( [ (row) => row.name, "firstname" ], "*", [ "email", "email_address" ] );
 
     it( "Should be length 3", function() {
@@ -94,7 +87,7 @@ describe( "Select - General tests", function() {
 
 
 describe( "Select - Invalid statements (throw error)", function() {
-    var q = new SQF();
+    const q = new SQF();
 
     it( "Function without alias", function() {
         assert.throws( function() { q.select( (row) => row ) }, "Error: Invalid select statement." );
@@ -109,7 +102,7 @@ describe( "Select - Invalid statements (throw error)", function() {
     });
 
     it( "Double star type statement", function() {
-        assert.throws( function() { q.select( "*", "*" ) }, "Error: Invalid select statement." )
+        assert.throws( function() { q.select( "*", "*" ) }, "Error: Invalid select statement." );
     });
     
 });

@@ -1,26 +1,26 @@
 {
-  "name": "sqf.js",
-  "version": "1.0.0",
-  "description": "Structured Query Framework",
-  "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
-  "scripts": {
-    "test": "mocha || true"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/antoniohdez/sqf.js.git"
-  },
-  "author": "Antonio Hernández Campos",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/antoniohdez/sqf.js/issues"
-  },
-  "homepage": "https://github.com/antoniohdez/sqf.js#readme",
-  "devDependencies": {
-    "chai": "^4.1.1",
-    "mocha": "^3.5.0"
-  }
+    "name": "sqf.js",
+    "version": "1.0.0",
+    "description": "Structured Query Framework",
+    "main": "index.js",
+    "directories": {
+        "test": "test"
+    },
+    "scripts": {
+        "test": "mocha --compilers js:babel-register --require babel-polyfill || true"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/antoniohdez/sqf.js.git"
+    },
+    "author": "Antonio Hernández Campos",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/antoniohdez/sqf.js/issues"
+    },
+    "homepage": "https://github.com/antoniohdez/sqf.js#readme",
+    "devDependencies": {
+        "chai": "^4.1.1",
+        "mocha": "^3.5.0"
+    }
 }
