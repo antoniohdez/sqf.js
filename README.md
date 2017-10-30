@@ -12,7 +12,7 @@ Usage
 
 sqf.js works best with data parsed from a JSON format but it can as well accept as input any kind of iterable within javascript.
 
-#### Building a query
+### Building a query
 
 ```javascript 
 const q = new SQF(); //instanciate object
@@ -21,7 +21,7 @@ const q = new SQF(); //instanciate object
 Overload query with the usual SQL sentence structure. 
 
 ```javascript 
-query.select('*').from(departments) //selects all columns
+query.select('*').from(departments) //selects all columns within 'departments' collection
 ```
 
 Execute query with the run command.
@@ -30,7 +30,7 @@ Execute query with the run command.
 query.run();
 ```
 
-##### Projection or Select
+#### Projection or select
 
 Projection receives as argument the names of the colums to be selected separated by commas
 
@@ -50,6 +50,31 @@ query.select(
 ).from(employees)
 ```
 Anonymous functions can also be passed within the iterable as first argument to perform any kind of processing whose result gets into a whole new column.
+
+#### Join
+
+Join receives as its two first arguments the collections to be joined as well as its alias followed by the function specifiying the atrributes under which the join is going to be executed.
+
+```javascript 
+query.from(
+    SQF.JOIN( 
+        [employees, "emp"], 
+        [departments, "dept"], 
+        (emp, dept) => emp.departmentId === dept.id  
+    ) 
+);
+```
+
+#### Selection or where
+
+Selecting requires a function per condition, multiple conditions can be added by placing a comma after each function.
+
+```javascript
+query.where(
+    (row) => row[ "emp.salary" ] > 10000, 
+    (row) => row[ "dept.department" ] === "IT"
+);
+```
 
 ### Methods
 
